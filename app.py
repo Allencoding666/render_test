@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-application = Application.builder().token("TOKEN").build()
+application = Application.builder().token("6589718266:AAHKFM9wwTTPCFCcwtiblLATHccCPLMHU1w").build()
 
 
 @app.route("/webhook", methods=["POST"])
@@ -55,4 +55,4 @@ if __name__ == "__main__":
     application.bot.setWebhook(webhook_url)
 
     # Run the Flask app
-    app.run(port=10000)  # Replace with the port you want to use (usually 443 for HTTPS)
+    app.run()  # Replace with the port you want to use (usually 443 for HTTPS)
