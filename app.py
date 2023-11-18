@@ -2,7 +2,7 @@ import logging
 from flask import Flask, request
 from telegram import Update, ForceReply
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
-
+import asyncio
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
@@ -55,12 +55,16 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 if __name__ == "__main__":
     # app.run(debug=True)  # Replace with the port you want to use (usually 443 for HTTPS)
 
+    loop = asyncio.get_event_loop()
+
+    # Set the webhook
+    loop.run_until_complete(set_webhook())
+
     # Add handlers to the application
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
 
-    # Set the webhook
-    application.run_until(set_webhook())
+
     print("run ok")
     app.run(debug=True)  # Replace with the port you want to use (usually 443 for HTTPS)
