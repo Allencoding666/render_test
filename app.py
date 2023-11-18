@@ -27,8 +27,8 @@ def webhook_handler():
     # Process the update using the application's dispatcher
     application.process_update(update)
     print("web ok")
-
-    return update.message.reply_text("456789")
+    update.message.reply_text("456789")
+    return "ok"
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
