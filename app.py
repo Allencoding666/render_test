@@ -15,7 +15,7 @@ application = Application.builder().token("6589718266:AAHKFM9wwTTPCFCcwtiblLATHc
 
 
 async def set_webhook():
-    webhook_url = "https://your_domain.com/webhook"  # Replace with your server's domain and endpoint
+    webhook_url = "https://r-render-test.onrender.com/webhook"  # Replace with your server's domain and endpoint
     await application.bot.setWebhook(webhook_url)
     print("Webhook set successfully")
 
@@ -23,9 +23,10 @@ async def set_webhook():
 def webhook_handler():
     """Handle incoming webhook updates."""
     update = Update.de_json(request.get_json(force=True), application.bot)
-
+    print("update : ", update)
     # Process the update using the application's dispatcher
     application.process_update(update)
+    print("web ok")
 
     return "ok"
 
@@ -41,11 +42,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /help is issued."""
+    print("help")
     await update.message.reply_text("Help!")
 
 
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Echo the user message."""
+    print("echo ok")
     await update.message.reply_text(update.message.text)
 
 
@@ -59,3 +62,4 @@ if __name__ == "__main__":
 
     # Set the webhook
     application.run_until(set_webhook())
+    print("run ok")
