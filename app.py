@@ -55,4 +55,4 @@ if __name__ == "__main__":
     application.bot.setWebhook(webhook_url)
 
     # Run the Flask app
-    app.run(port=8443)  # Replace with the port you want to use (usually 443 for HTTPS)
+    app.run(port=10000)  # Replace with the port you want to use (usually 443 for HTTPS)
