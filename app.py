@@ -53,7 +53,7 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 if __name__ == "__main__":
-    app.run(debug=True)  # Replace with the port you want to use (usually 443 for HTTPS)
+    # app.run(debug=True)  # Replace with the port you want to use (usually 443 for HTTPS)
 
     # Add handlers to the application
     application.add_handler(CommandHandler("start", start))
@@ -63,3 +63,4 @@ if __name__ == "__main__":
     # Set the webhook
     application.run_until(set_webhook())
     print("run ok")
+    app.run(debug=True)  # Replace with the port you want to use (usually 443 for HTTPS)
