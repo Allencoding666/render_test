@@ -51,7 +51,7 @@ if __name__ == "__main__":
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
 
     # Set the webhook URL
-    webhook_url = "https://r-telegram-bot.onrender.com/webhook"  # Replace with your server's domain and endpoint
+    webhook_url = "https://r-render-test.onrender.com/webhook"  # Replace with your server's domain and endpoint
     application.bot.setWebhook(webhook_url)
 
     # Run the Flask app
