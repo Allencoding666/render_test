@@ -14,6 +14,11 @@ app = Flask(__name__)
 application = Application.builder().token("6589718266:AAHKFM9wwTTPCFCcwtiblLATHccCPLMHU1w").build()
 
 
+async def set_webhook():
+    webhook_url = "https://your_domain.com/webhook"  # Replace with your server's domain and endpoint
+    await application.bot.setWebhook(webhook_url)
+    print("Webhook set successfully")
+
 @app.route("/webhook", methods=["POST"])
 def webhook_handler():
     """Handle incoming webhook updates."""
@@ -45,14 +50,12 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 if __name__ == "__main__":
+    app.run(debug=True)  # Replace with the port you want to use (usually 443 for HTTPS)
+
     # Add handlers to the application
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
 
-    # Set the webhook URL
-    webhook_url = "https://r-render-test.onrender.com/webhook"  # Replace with your server's domain and endpoint
-    application.bot.setWebhook(webhook_url)
-
-    # Run the Flask app
-    app.run()  # Replace with the port you want to use (usually 443 for HTTPS)
+    # Set the webhook
+    application.run_until(set_webhook())
