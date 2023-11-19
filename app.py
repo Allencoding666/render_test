@@ -20,14 +20,14 @@ async def set_webhook():
     print("Webhook set successfully")
 
 @app.route("/webhook", methods=["POST"])
-def webhook_handler():
+async def webhook_handler():
     """Handle incoming webhook updates."""
     update = Update.de_json(request.get_json(force=True), application.bot)
     print("update : ", update)
     # Process the update using the application's dispatcher
     application.process_update(update)
     print("web ok")
-    update.message.reply_text("456789")
+    await update.message.reply_text("456789")
     return "ok"
 
 
