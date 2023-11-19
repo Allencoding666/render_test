@@ -115,15 +115,15 @@ async def main() -> None:
     await application.bot.set_webhook(url=f"{URL}/telegram", allowed_updates=Update.ALL_TYPES)
 
     # Set up webserver
-    flask_app = Flask(__name__)
+    app = Flask(__name__)
 
-    @flask_app.post("/telegram")  # type: ignore[misc]
+    @app.post("/telegram")  # type: ignore[misc]
     async def telegram() -> Response:
         """Handle incoming Telegram updates by putting them into the `update_queue`"""
         await application.update_queue.put(Update.de_json(data=request.json, bot=application.bot))
         return Response(status=HTTPStatus.OK)
 
-    @flask_app.route("/submitpayload", methods=["GET", "POST"])  # type: ignore[misc]
+    @app.route("/submitpayload", methods=["GET", "POST"])  # type: ignore[misc]
     async def custom_updates() -> Response:
         """
         Handle incoming webhook updates by also putting them into the `update_queue` if
@@ -143,7 +143,7 @@ async def main() -> None:
         await application.update_queue.put(WebhookUpdate(user_id=user_id, payload=payload))
         return Response(status=HTTPStatus.OK)
 
-    @flask_app.get("/healthcheck")  # type: ignore[misc]
+    @app.get("/healthcheck")  # type: ignore[misc]
     async def health() -> Response:
         """For the health endpoint, reply with a simple plain text message."""
         response = make_response("The bot is still running fine :)", HTTPStatus.OK)
@@ -152,7 +152,7 @@ async def main() -> None:
 
     webserver = uvicorn.Server(
         config=uvicorn.Config(
-            app=WsgiToAsgi(flask_app),
+            app=WsgiToAsgi(app),
             # port=PORT,
             use_colors=False,
             host="127.0.0.1",
