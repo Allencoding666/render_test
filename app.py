@@ -44,9 +44,9 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 # Define configuration constants
-URL = "https://r-render-test.onrender.com"
-# ADMIN_CHAT_ID = 123456
-# PORT = 8000
+URL = "https://r-telegram-bot.onrender.com"
+ADMIN_CHAT_ID = 1406600575
+PORT = 10000
 TOKEN = "6589718266:AAHKFM9wwTTPCFCcwtiblLATHccCPLMHU1w"  # nosec B105
 
 
@@ -95,7 +95,7 @@ async def webhook_update(update: WebhookUpdate, context: CustomContext) -> None:
         f"The user {chat_member.user.mention_html()} has sent a new payload. "
         f"So far they have sent the following payloads: \n\n• <code>{combined_payloads}</code>"
     )
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=text, parse_mode=ParseMode.HTML)
+    await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=text, parse_mode=ParseMode.HTML)
 
 
 async def main() -> None:
@@ -115,15 +115,15 @@ async def main() -> None:
     await application.bot.set_webhook(url=f"{URL}/telegram", allowed_updates=Update.ALL_TYPES)
 
     # Set up webserver
-    app = Flask(__name__)
+    flask_app = Flask(__name__)
 
-    @app.post("/telegram")  # type: ignore[misc]
+    @flask_app.post("/telegram")  # type: ignore[misc]
     async def telegram() -> Response:
         """Handle incoming Telegram updates by putting them into the `update_queue`"""
         await application.update_queue.put(Update.de_json(data=request.json, bot=application.bot))
         return Response(status=HTTPStatus.OK)
 
-    @app.route("/submitpayload", methods=["GET", "POST"])  # type: ignore[misc]
+    @flask_app.route("/submitpayload", methods=["GET", "POST"])  # type: ignore[misc]
     async def custom_updates() -> Response:
         """
         Handle incoming webhook updates by also putting them into the `update_queue` if
@@ -143,7 +143,7 @@ async def main() -> None:
         await application.update_queue.put(WebhookUpdate(user_id=user_id, payload=payload))
         return Response(status=HTTPStatus.OK)
 
-    @app.get("/healthcheck")  # type: ignore[misc]
+    @flask_app.get("/healthcheck")  # type: ignore[misc]
     async def health() -> Response:
         """For the health endpoint, reply with a simple plain text message."""
         response = make_response("The bot is still running fine :)", HTTPStatus.OK)
@@ -152,8 +152,8 @@ async def main() -> None:
 
     webserver = uvicorn.Server(
         config=uvicorn.Config(
-            app=WsgiToAsgi(app),
-            # port=PORT,
+            app=WsgiToAsgi(flask_app),
+            port=PORT,
             use_colors=False,
             host="127.0.0.1",
         )
@@ -168,74 +168,3 @@ async def main() -> None:
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-# import logging
-# from flask import Flask, request
-# from telegram import Update, ForceReply
-# from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
-# import asyncio
-# logging.basicConfig(
-#     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
-# )
-#
-# logger = logging.getLogger(__name__)
-#
-# app = Flask(__name__)
-#
-# application = Application.builder().token("6589718266:AAHKFM9wwTTPCFCcwtiblLATHccCPLMHU1w").build()
-#
-#
-# async def set_webhook():
-#     webhook_url = "https://r-render-test.onrender.com/webhook"  # Replace with your server's domain and endpoint
-#     await application.bot.setWebhook(webhook_url)
-#     print("Webhook set successfully")
-#
-# @app.route("/webhook", methods=["POST"])
-# async def webhook_handler():
-#     """Handle incoming webhook updates."""
-#     update = Update.de_json(request.get_json(force=True), application.bot)
-#     print("update : ", update)
-#     # Process the update using the application's dispatcher
-#     application.process_update(update)
-#     print("web ok")
-#     await update.message.reply_text("456789")
-#     return "ok"
-#
-#
-# async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-#     """Send a message when the command /start is issued."""
-#     user = update.effective_user
-#     await update.message.reply_html(
-#         rf"Hi {user.mention_html()}!",
-#         reply_markup=ForceReply(selective=True),
-#     )
-#
-#
-# async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-#     """Send a message when the command /help is issued."""
-#     print("help")
-#     await update.message.reply_text("Help!")
-#
-#
-# async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-#     """Echo the user message."""
-#     print("echo ok")
-#     await update.message.reply_text(update.message.text)
-#
-#
-# if __name__ == "__main__":
-#     # app.run(debug=True)  # Replace with the port you want to use (usually 443 for HTTPS)
-#
-#     loop = asyncio.get_event_loop()
-#
-#     # Set the webhook
-#     loop.run_until_complete(set_webhook())
-#
-#     # Add handlers to the application
-#     application.add_handler(CommandHandler("start", start))
-#     application.add_handler(CommandHandler("help", help_command))
-#     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
-#
-#
-#     print("run ok")
-#     app.run(debug=True)  # Replace with the port you want to use (usually 443 for HTTPS)
