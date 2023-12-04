@@ -1,1 +1,1 @@
-web gunicorn app:flask_app
+web: gunicorn -w 4 -k uvicorn.workers.UvicornWorker app:flask_app
