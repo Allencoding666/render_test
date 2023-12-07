@@ -44,7 +44,7 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 # Define configuration constants
-URL = "https://r-telegram-bot.onrender.com"
+URL = "https://r-render-test.onrender.com"
 ADMIN_CHAT_ID = 1406600575
 PORT = 10000
 TOKEN = "6589718266:AAHKFM9wwTTPCFCcwtiblLATHccCPLMHU1w"  # nosec B105
@@ -120,6 +120,7 @@ async def main() -> None:
     @flask_app.post("/telegram")  # type: ignore[misc]
     async def telegram() -> Response:
         """Handle incoming Telegram updates by putting them into the `update_queue`"""
+        print("test post")
         await application.update_queue.put(Update.de_json(data=request.json, bot=application.bot))
         return Response(status=HTTPStatus.OK)
 
