@@ -117,6 +117,10 @@ async def main() -> None:
     # Set up webserver
     flask_app = Flask(__name__)
 
+    @flask_app.get("/")
+    async def index():
+        return "初始頁面"
+
     @flask_app.post("/telegram")  # type: ignore[misc]
     async def telegram() -> Response:
         """Handle incoming Telegram updates by putting them into the `update_queue`"""
