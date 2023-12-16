@@ -99,6 +99,7 @@ async def webhook_update(update: WebhookUpdate, context: CustomContext) -> None:
 
 
 async def main() -> None:
+    print("在main")
     """Set up PTB application and a web application for handling the incoming requests."""
     context_types = ContextTypes(context=CustomContext)
     # Here we set updater to None because we want our custom webhook server to handle the updates
@@ -172,4 +173,5 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
+    print("開始")
     asyncio.run(main())
