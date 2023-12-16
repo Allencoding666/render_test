@@ -46,7 +46,7 @@ logger = logging.getLogger(__name__)
 # Define configuration constants
 URL = "https://r-render-test.onrender.com"
 ADMIN_CHAT_ID = 1406600575
-PORT = 443
+PORT = 5000
 TOKEN = "6589718266:AAHKFM9wwTTPCFCcwtiblLATHccCPLMHU1w"  # nosec B105
 
 
@@ -99,7 +99,6 @@ async def webhook_update(update: WebhookUpdate, context: CustomContext) -> None:
 
 
 async def main() -> None:
-    print("在main")
     """Set up PTB application and a web application for handling the incoming requests."""
     context_types = ContextTypes(context=CustomContext)
     # Here we set updater to None because we want our custom webhook server to handle the updates
@@ -118,14 +117,9 @@ async def main() -> None:
     # Set up webserver
     flask_app = Flask(__name__)
 
-    @flask_app.get("/")
-    async def index():
-        return "初始頁面"
-
     @flask_app.post("/telegram")  # type: ignore[misc]
     async def telegram() -> Response:
         """Handle incoming Telegram updates by putting them into the `update_queue`"""
-        print("test post")
         await application.update_queue.put(Update.de_json(data=request.json, bot=application.bot))
         return Response(status=HTTPStatus.OK)
 
@@ -161,7 +155,7 @@ async def main() -> None:
             app=WsgiToAsgi(flask_app),
             port=PORT,
             use_colors=False,
-            host="https://r-render-test.onrender.com",
+            host="https://r-render-test.onrender.com"
         )
     )
 
@@ -173,5 +167,4 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    print("開始")
     asyncio.run(main())
