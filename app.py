@@ -75,19 +75,19 @@ class CustomContext(CallbackContext[ExtBot, dict, dict, dict]):
         return super().from_update(update, application)
 
 
-def start(update: Update, context: CustomContext) -> None:
+async def start(update: Update, context: CustomContext) -> None:
     """Display a message with instructions on how to use this bot."""
     payload_url = html.escape(f"{URL}/submitpayload?user_id=<your user id>&payload=<payload>")
     text = (
         f"To check if the bot is still running, call <code>{URL}/healthcheck</code>.\n\n"
         f"To post a custom update, call <code>{payload_url}</code>."
     )
-    update.message.reply_html(text=text)
+    await update.message.reply_html(text=text)
 
 
-def webhook_update(update: WebhookUpdate, context: CustomContext) -> None:
+async def webhook_update(update: WebhookUpdate, context: CustomContext) -> None:
     """Handle custom updates."""
-    chat_member = context.bot.get_chat_member(chat_id=update.user_id, user_id=update.user_id)
+    chat_member = await context.bot.get_chat_member(chat_id=update.user_id, user_id=update.user_id)
     payloads = context.user_data.setdefault("payloads", [])
     payloads.append(update.payload)
     combined_payloads = "</code>\n• <code>".join(payloads)
@@ -95,10 +95,10 @@ def webhook_update(update: WebhookUpdate, context: CustomContext) -> None:
         f"The user {chat_member.user.mention_html()} has sent a new payload. "
         f"So far they have sent the following payloads: \n\n• <code>{combined_payloads}</code>"
     )
-    context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=text, parse_mode=ParseMode.HTML)
+    await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=text, parse_mode=ParseMode.HTML)
 
 
-def main() -> None:
+async def main() -> None:
     print("在main")
     """Set up PTB application and a web application for handling the incoming requests."""
     context_types = ContextTypes(context=CustomContext)
@@ -113,24 +113,24 @@ def main() -> None:
     application.add_handler(TypeHandler(type=WebhookUpdate, callback=webhook_update))
 
     # Pass webhook settings to telegram
-    application.bot.set_webhook(url=f"{URL}/telegram", allowed_updates=Update.ALL_TYPES)
+    await application.bot.set_webhook(url=f"{URL}/telegram", allowed_updates=Update.ALL_TYPES)
 
     # Set up webserver
     flask_app = Flask(__name__)
 
     @flask_app.get("/")
-    def index():
+    async def index():
         return "初始頁面"
 
     @flask_app.post("/telegram")  # type: ignore[misc]
-    def telegram() -> Response:
+    async def telegram() -> Response:
         """Handle incoming Telegram updates by putting them into the `update_queue`"""
         print("test post")
-        application.update_queue.put(Update.de_json(data=request.json, bot=application.bot))
+        await application.update_queue.put(Update.de_json(data=request.json, bot=application.bot))
         return Response(status=HTTPStatus.OK)
 
     @flask_app.route("/submitpayload", methods=["GET", "POST"])  # type: ignore[misc]
-    def custom_updates() -> Response:
+    async def custom_updates() -> Response:
         """
         Handle incoming webhook updates by also putting them into the `update_queue` if
         the required parameters were passed correctly.
@@ -146,11 +146,11 @@ def main() -> None:
         except ValueError:
             abort(HTTPStatus.BAD_REQUEST, "The `user_id` must be a string!")
 
-        application.update_queue.put(WebhookUpdate(user_id=user_id, payload=payload))
+        await application.update_queue.put(WebhookUpdate(user_id=user_id, payload=payload))
         return Response(status=HTTPStatus.OK)
 
     @flask_app.get("/healthcheck")  # type: ignore[misc]
-    def health() -> Response:
+    async def health() -> Response:
         """For the health endpoint, reply with a simple plain text message."""
         response = make_response("The bot is still running fine :)", HTTPStatus.OK)
         response.mimetype = "text/plain"
@@ -161,18 +161,17 @@ def main() -> None:
             app=WsgiToAsgi(flask_app),
             port=PORT,
             use_colors=False,
-            host="127.0.0.1",
+            host="https://r-render-test.onrender.com",
         )
     )
 
     # Run application and webserver together
-    with application:
-        application.start()
-        webserver.serve()
-        application.stop()
+    async with application:
+        await application.start()
+        await webserver.serve()
+        await application.stop()
 
 
 if __name__ == "__main__":
     print("開始")
-    main()
-
+    asyncio.run(main())
