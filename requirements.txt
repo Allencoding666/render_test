@@ -6,3 +6,4 @@ requests
 uvicorn
 asgiref
 flask[async]
+asyncio

@@ -155,7 +155,7 @@ async def main() -> None:
             app=WsgiToAsgi(flask_app),
             port=PORT,
             use_colors=False,
-            host="https://r-render-test.onrender.com"
+            host="0.0.0.0"
         )
     )
 
