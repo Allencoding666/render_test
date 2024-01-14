@@ -32,7 +32,10 @@ from telegram.ext import (
     ContextTypes,
     ExtBot,
     TypeHandler,
+    MessageHandler,
+    filters
 )
+from telegram.ext.filters import MessageFilter
 
 # Enable logging
 logging.basicConfig(
@@ -66,9 +69,9 @@ class CustomContext(CallbackContext[ExtBot, dict, dict, dict]):
 
     @classmethod
     def from_update(
-        cls,
-        update: object,
-        application: "Application",
+            cls,
+            update: object,
+            application: "Application",
     ) -> "CustomContext":
         if isinstance(update, WebhookUpdate):
             return cls(application=application, user_id=update.user_id)
@@ -98,10 +101,15 @@ async def webhook_update(update: WebhookUpdate, context: CustomContext) -> None:
     await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=text, parse_mode=ParseMode.HTML)
 
 
-async def test(update: WebhookUpdate, context: CustomContext) -> None:
+async def msg_test(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle custom updates."""
-    text="測試"
+    text = "測試"
     await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=text)
+
+
+class FilterTest(MessageFilter):
+    def filter(self, message):
+        return "哈哈" in message.text
 
 
 async def main() -> None:
@@ -116,7 +124,7 @@ async def main() -> None:
     # register handlers
     application.add_handler(CommandHandler("start", start))
     application.add_handler(TypeHandler(type=WebhookUpdate, callback=webhook_update))
-    application.add_handler(TypeHandler(type=WebhookUpdate, callback=test))
+    application.add_handler(MessageHandler(filters.TEXT, msg_test))
 
     # Pass webhook settings to telegram
     await application.bot.set_webhook(url=f"{URL}/telegram", allowed_updates=Update.ALL_TYPES)
