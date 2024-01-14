@@ -98,6 +98,12 @@ async def webhook_update(update: WebhookUpdate, context: CustomContext) -> None:
     await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=text, parse_mode=ParseMode.HTML)
 
 
+async def test(update: WebhookUpdate, context: CustomContext) -> None:
+    """Handle custom updates."""
+    text="測試"
+    await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=text)
+
+
 async def main() -> None:
     """Set up PTB application and a web application for handling the incoming requests."""
     context_types = ContextTypes(context=CustomContext)
@@ -110,6 +116,7 @@ async def main() -> None:
     # register handlers
     application.add_handler(CommandHandler("start", start))
     application.add_handler(TypeHandler(type=WebhookUpdate, callback=webhook_update))
+    application.add_handler(TypeHandler(type=WebhookUpdate, callback=test))
 
     # Pass webhook settings to telegram
     await application.bot.set_webhook(url=f"{URL}/telegram", allowed_updates=Update.ALL_TYPES)
