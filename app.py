@@ -47,10 +47,10 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 # Define configuration constants
-URL = "https://r-render-test.onrender.com"
-ADMIN_CHAT_ID = 1406600575
+# URL = "https://r-render-test.onrender.com"
+# ADMIN_CHAT_ID = 1406600575
 PORT = 5000
-TOKEN = "6589718266:AAHKFM9wwTTPCFCcwtiblLATHccCPLMHU1w"  # nosec B105
+# TOKEN = "6589718266:AAHKFM9wwTTPCFCcwtiblLATHccCPLMHU1w"  # nosec B105
 
 
 @dataclass
@@ -107,7 +107,7 @@ async def msg_test(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=text)
 
 
-class FilterTest(MessageFilter):
+class FilterMsgTest(MessageFilter):
     def filter(self, message):
         return "哈哈" in message.text
 
@@ -124,7 +124,7 @@ async def main() -> None:
     # register handlers
     application.add_handler(CommandHandler("start", start))
     application.add_handler(TypeHandler(type=WebhookUpdate, callback=webhook_update))
-    application.add_handler(MessageHandler(filters.TEXT, msg_test))
+    application.add_handler(MessageHandler(FilterMsgTest, msg_test))
 
     # Pass webhook settings to telegram
     await application.bot.set_webhook(url=f"{URL}/telegram", allowed_updates=Update.ALL_TYPES)
