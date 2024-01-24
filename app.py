@@ -34,6 +34,7 @@ from telegram.ext import (
     ExtBot,
     TypeHandler,
     MessageHandler,
+    filters
 )
 from telegram.ext.filters import MessageFilter
 
@@ -50,7 +51,7 @@ logger = logging.getLogger(__name__)
 server_url = os.environ.get("URL")
 admin_chat_id = os.environ.get("ADMIN_CHAT_ID")
 PORT = 5000
-token = os.environ.get("TOKEN")
+token = os.getenv("TOKEN")
 # URL = "https://r-render-test.onrender.com"
 # ADMIN_CHAT_ID = 1406600575
 # PORT = 5000
@@ -105,6 +106,11 @@ async def webhook_update(update: WebhookUpdate, context: CustomContext) -> None:
     await context.bot.send_message(chat_id=admin_chat_id, text=text, parse_mode=ParseMode.HTML)
 
 
+async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Echo the user message."""
+    await update.message.reply_text(update.message.text)
+
+
 async def msg_test(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle custom updates."""
     text = "測試"
@@ -131,6 +137,8 @@ async def main() -> None:
 
     filter_msg_test = FilterMsgTest()
     application.add_handler(MessageHandler(filter_msg_test, msg_test))
+
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
 
     # Pass webhook settings to telegram
     await application.bot.set_webhook(url=f"{server_url}/telegram", allowed_updates=Update.ALL_TYPES)
