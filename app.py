@@ -16,6 +16,7 @@ Press Ctrl-C on the command line or send a signal to the process to stop the bot
 import asyncio
 import html
 import logging
+import os
 from dataclasses import dataclass
 from http import HTTPStatus
 
@@ -33,7 +34,6 @@ from telegram.ext import (
     ExtBot,
     TypeHandler,
     MessageHandler,
-    filters
 )
 from telegram.ext.filters import MessageFilter
 
@@ -47,9 +47,13 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 # Define configuration constants
+server_url = os.getenv("URL")
+admin_chat_id = os.getenv("ADMIN_CHAT_ID")
+PORT = 5000
+token = os.getenv("TOKEN")
 # URL = "https://r-render-test.onrender.com"
 # ADMIN_CHAT_ID = 1406600575
-PORT = 5000
+# PORT = 5000
 # TOKEN = "6589718266:AAHKFM9wwTTPCFCcwtiblLATHccCPLMHU1w"  # nosec B105
 
 
@@ -80,9 +84,9 @@ class CustomContext(CallbackContext[ExtBot, dict, dict, dict]):
 
 async def start(update: Update, context: CustomContext) -> None:
     """Display a message with instructions on how to use this bot."""
-    payload_url = html.escape(f"{URL}/submitpayload?user_id=<your user id>&payload=<payload>")
+    payload_url = html.escape(f"{server_url}/submitpayload?user_id=<your user id>&payload=<payload>")
     text = (
-        f"To check if the bot is still running, call <code>{URL}/healthcheck</code>.\n\n"
+        f"To check if the bot is still running, call <code>{server_url}/healthcheck</code>.\n\n"
         f"To post a custom update, call <code>{payload_url}</code>."
     )
     await update.message.reply_html(text=text)
@@ -98,13 +102,13 @@ async def webhook_update(update: WebhookUpdate, context: CustomContext) -> None:
         f"The user {chat_member.user.mention_html()} has sent a new payload. "
         f"So far they have sent the following payloads: \n\n• <code>{combined_payloads}</code>"
     )
-    await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=text, parse_mode=ParseMode.HTML)
+    await context.bot.send_message(chat_id=admin_chat_id, text=text, parse_mode=ParseMode.HTML)
 
 
 async def msg_test(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle custom updates."""
     text = "測試"
-    await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=text)
+    await context.bot.send_message(chat_id=admin_chat_id, text=text)
 
 
 class FilterMsgTest(MessageFilter):
@@ -118,16 +122,18 @@ async def main() -> None:
     # Here we set updater to None because we want our custom webhook server to handle the updates
     # and hence we don't need an Updater instance
     application = (
-        Application.builder().token(TOKEN).updater(None).context_types(context_types).build()
+        Application.builder().token(token).updater(None).context_types(context_types).build()
     )
 
     # register handlers
     application.add_handler(CommandHandler("start", start))
     application.add_handler(TypeHandler(type=WebhookUpdate, callback=webhook_update))
-    application.add_handler(MessageHandler(FilterMsgTest, msg_test))
+
+    filter_msg_test = FilterMsgTest()
+    application.add_handler(MessageHandler(filter_msg_test, msg_test))
 
     # Pass webhook settings to telegram
-    await application.bot.set_webhook(url=f"{URL}/telegram", allowed_updates=Update.ALL_TYPES)
+    await application.bot.set_webhook(url=f"{server_url}/telegram", allowed_updates=Update.ALL_TYPES)
 
     # Set up webserver
     flask_app = Flask(__name__)
