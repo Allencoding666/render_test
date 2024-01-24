@@ -47,10 +47,10 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 # Define configuration constants
-server_url = os.getenv("URL")
-admin_chat_id = os.getenv("ADMIN_CHAT_ID")
+server_url = os.environ.get("URL")
+admin_chat_id = os.environ.get("ADMIN_CHAT_ID")
 PORT = 5000
-token = os.getenv("TOKEN")
+token = os.environ.get("TOKEN")
 # URL = "https://r-render-test.onrender.com"
 # ADMIN_CHAT_ID = 1406600575
 # PORT = 5000
