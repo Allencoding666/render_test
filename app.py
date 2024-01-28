@@ -109,7 +109,7 @@ async def main() -> None:
     context_types = ContextTypes(context=CustomContext)
     # Here we set updater to None because we want our custom webhook server to handle the updates
     # and hence we don't need an Updater instance
-    print('BOT_TOKEN = ', BOT_TOKEN)
+    print("SEVER_URL : ", SEVER_URL)
     application = (
         Application.builder().token(BOT_TOKEN).updater(None).context_types(context_types).build()
     )
