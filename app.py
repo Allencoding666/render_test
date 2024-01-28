@@ -50,11 +50,11 @@ async def main() -> None:
     # Set up webserver
     flask_app = Flask(__name__)
 
-    # @flask_app.post("/telegram")  # type: ignore[misc]
-    # async def telegram() -> Response:
-    #     """Handle incoming Telegram updates by putting them into the `update_queue`"""
-    #     await application.update_queue.put(Update.de_json(data=request.json, bot=application.bot))
-    #     return Response(status=HTTPStatus.OK)
+    @flask_app.post("/telegram")  # type: ignore[misc]
+    async def telegram() -> Response:
+        """Handle incoming Telegram updates by putting them into the `update_queue`"""
+        await application.update_queue.put(Update.de_json(data=request.json, bot=application.bot))
+        return Response(status=HTTPStatus.OK)
 
     @flask_app.get("/healthcheck")  # type: ignore[misc]
     async def health() -> Response:
