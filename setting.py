@@ -1,7 +1,4 @@
 import os
-from telegram.ext import (
-    CallbackContext,
-)
 
 # Define configuration constants
 SEVER_URL = os.environ.get("SEVER_URL", "https://r-render-test.onrender.com")
