@@ -1,39 +1,18 @@
-#!/usr/bin/env python
-# This program is dedicated to the public domain under the CC0 license.
-# pylint: disable=import-error,unused-argument
-"""
-Simple example of a bot that uses a custom webhook setup and handles custom updates.
-For the custom webhook setup, the libraries `flask`, `asgiref` and `uvicorn` are used. Please
-install them as `pip install flask[async]~=2.3.2 uvicorn~=0.23.2 asgiref~=3.7.2`.
-Note that any other `asyncio` based web server framework can be used for a custom webhook setup
-just as well.
-
-Usage:
-Set bot Token, URL, admin CHAT_ID and PORT after the imports.
-You may also need to change the `listen` value in the uvicorn configuration to match your setup.
-Press Ctrl-C on the command line or send a signal to the process to stop the bot.
-"""
 import asyncio
 import logging
-from dataclasses import dataclass
 from http import HTTPStatus
 
 import uvicorn
 from asgiref.wsgi import WsgiToAsgi
-from flask import Flask, Response, abort, make_response, request
+from flask import Flask, Response, make_response, request
 
 from telegram import Update
-from telegram.constants import ParseMode
 from telegram.ext import (
     Application,
     CommandHandler,
-    CallbackContext,
     ContextTypes,
-    ExtBot,
-    TypeHandler,
     MessageHandler,
     filters,
-
 )
 import command_funcs
 import message_funcs
@@ -50,57 +29,15 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 
-# @dataclass
-# class WebhookUpdate:
-#     """Simple dataclass to wrap a custom update type"""
-#
-#     user_id: int
-#     payload: str
-
-
-# class CustomContext(CallbackContext[ExtBot, dict, dict, dict]):
-#     """
-#     Custom CallbackContext class that makes `user_data` available for updates of type
-#     `WebhookUpdate`.
-#     """
-#
-#     @classmethod
-#     def from_update(
-#             cls,
-#             update: object,
-#             application: "Application",
-#     ) -> "CustomContext":
-#         if isinstance(update, WebhookUpdate):
-#             return cls(application=application, user_id=update.user_id)
-#         return super().from_update(update, application)
-
-
-# async def webhook_update(update: WebhookUpdate, context: CustomContext) -> None:
-#     """Handle custom updates."""
-#     chat_member = await context.bot.get_chat_member(chat_id=update.user_id, user_id=update.user_id)
-#     payloads = context.user_data.setdefault("payloads", [])
-#     payloads.append(update.payload)
-#     combined_payloads = "</code>\n• <code>".join(payloads)
-#     text = (
-#         f"The user {chat_member.user.mention_html()} has sent a new payload. "
-#         f"So far they have sent the following payloads: \n\n• <code>{combined_payloads}</code>"
-#     )
-#     await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=text, parse_mode=ParseMode.HTML)
-
-
 async def main() -> None:
     """Set up PTB application and a web application for handling the incoming requests."""
-    context_types = ContextTypes()
-    # context_types = ContextTypes(context=CustomContext)
-    # Here we set updater to None because we want our custom webhook server to handle the updates
-    # and hence we don't need an Updater instance
+
     application = (
-        Application.builder().token(BOT_TOKEN).updater(None).context_types(context_types).build()
+        Application.builder().token(BOT_TOKEN).updater(None).context_types(ContextTypes()).build()
     )
 
     # register handlers
     application.add_handler(CommandHandler("start", command_funcs.start))
-    # application.add_handler(TypeHandler(type=WebhookUpdate, callback=webhook_update))
 
     filter_msg_test = filter_funcs.FilterMsgTest()
     application.add_handler(MessageHandler(filter_msg_test, message_funcs.msg_test))
@@ -113,30 +50,10 @@ async def main() -> None:
     # Set up webserver
     flask_app = Flask(__name__)
 
-    @flask_app.post("/telegram")  # type: ignore[misc]
-    async def telegram() -> Response:
-        """Handle incoming Telegram updates by putting them into the `update_queue`"""
-        await application.update_queue.put(Update.de_json(data=request.json, bot=application.bot))
-        return Response(status=HTTPStatus.OK)
-
-    # @flask_app.route("/submitpayload", methods=["GET", "POST"])  # type: ignore[misc]
-    # async def custom_updates() -> Response:
-    #     """
-    #     Handle incoming webhook updates by also putting them into the `update_queue` if
-    #     the required parameters were passed correctly.
-    #     """
-    #     try:
-    #         user_id = int(request.args["user_id"])
-    #         payload = request.args["payload"]
-    #     except KeyError:
-    #         abort(
-    #             HTTPStatus.BAD_REQUEST,
-    #             "Please pass both `user_id` and `payload` as query parameters.",
-    #         )
-    #     except ValueError:
-    #         abort(HTTPStatus.BAD_REQUEST, "The `user_id` must be a string!")
-    #
-    #     await application.update_queue.put(WebhookUpdate(user_id=user_id, payload=payload))
+    # @flask_app.post("/telegram")  # type: ignore[misc]
+    # async def telegram() -> Response:
+    #     """Handle incoming Telegram updates by putting them into the `update_queue`"""
+    #     await application.update_queue.put(Update.de_json(data=request.json, bot=application.bot))
     #     return Response(status=HTTPStatus.OK)
 
     @flask_app.get("/healthcheck")  # type: ignore[misc]
