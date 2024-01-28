@@ -90,6 +90,7 @@ logger = logging.getLogger(__name__)
 
 async def main() -> None:
     """Set up PTB application and a web application for handling the incoming requests."""
+    context_types = ContextTypes()
     # context_types = ContextTypes(context=CustomContext)
     # Here we set updater to None because we want our custom webhook server to handle the updates
     # and hence we don't need an Updater instance
