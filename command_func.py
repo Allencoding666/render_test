@@ -1,3 +1,4 @@
+from init import *
 import html
 from telegram import Update
 from telegram.ext import (
@@ -7,8 +8,8 @@ from telegram.ext import (
 
 async def start(update: Update, context: CallbackContext) -> None:
     """Display a message with instructions on how to use this bot."""
-    server_url = context.bot_data.get["SEVER_URL"]
-    print("server_url : ", server_url)
+    server_url = SEVER_URL
+    print(context)
     payload_url = html.escape(f"{server_url}/submitpayload?user_id=<your user id>&payload=<payload>")
     text = (
         f"To check if the bot is still running, call <code>{server_url}/healthcheck</code>.\n\n"
