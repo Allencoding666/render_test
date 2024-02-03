@@ -6,3 +6,4 @@ uvicorn
 asgiref
 flask[async]
 asyncio
+aiohttp

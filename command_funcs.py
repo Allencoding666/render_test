@@ -5,6 +5,7 @@ from telegram.ext import (
     CallbackContext,
 )
 import requests
+import aiohttp
 
 
 async def start(update: Update, context: CallbackContext) -> None:
@@ -26,8 +27,13 @@ async def start(update: Update, context: CallbackContext) -> None:
 async def weather(update: Update, context: CallbackContext) -> None:
     """取得台中市天氣預報"""
     url = "https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-073?Authorization=CWA-55E41616-4DFC-494F-8D12-2121983E8639&limit=1&locationName=%E8%A5%BF%E5%B1%AF%E5%8D%80&elementName=WeatherDescription"
-    rsp = requests.get(url)
-    rsp_json = rsp.json()
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as rsp:
+            rsp_json = await rsp.json()
+
+    # rsp = requests.get(url)
+    # rsp_json = rsp.json()
     city = rsp_json["records"]["locations"][0]["locationsName"]
     district = rsp_json["records"]["locations"][0]["location"][0]["locationName"]
     description = rsp_json["records"]["locations"][0]["location"][0]["weatherElement"][0]["description"]
