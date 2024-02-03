@@ -13,7 +13,7 @@ async def start(update: Update, context: CallbackContext) -> None:
     print("update : ", update)
     print("update.message : ", update.message)
     print("update.api_kwargs : ", update.api_kwargs)
-    print(context)
+    print(context.args[0])
 
     payload_url = html.escape(f"{server_url}/submitpayload?user_id=<your user id>&payload=<payload>")
     text = (
@@ -23,7 +23,7 @@ async def start(update: Update, context: CallbackContext) -> None:
     await update.message.reply_html(text=text)
 
 
-async def weather(update: Update, context: CallbackContext, location_name: str = "西屯區") -> None:
+async def weather(update: Update, context: CallbackContext) -> None:
     """取得台中市天氣預報"""
     url = "https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-073?Authorization=CWA-55E41616-4DFC-494F-8D12-2121983E8639&limit=1&locationName=%E8%A5%BF%E5%B1%AF%E5%8D%80&elementName=WeatherDescription"
     rsp = requests.get(url)
