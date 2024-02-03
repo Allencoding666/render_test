@@ -46,4 +46,4 @@ async def weather(update: Update, context: CallbackContext) -> None:
         value = data["elementValue"][0]["value"]
         result += f"{start_time} ~ {end_time}\n - 天氣預報 : {value}\n"
 
-    await update.message.reply_html(text=result)
+    await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=result)
