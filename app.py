@@ -38,6 +38,7 @@ async def main() -> None:
 
     # register handlers
     application.add_handler(CommandHandler("start", command_funcs.start))
+    application.add_handler(CommandHandler("weather", command_funcs.weather))
 
     filter_msg_test = filter_funcs.FilterMsgTest()
     application.add_handler(MessageHandler(filter_msg_test, message_funcs.msg_test))
@@ -53,7 +54,6 @@ async def main() -> None:
     @flask_app.post("/telegram")  # type: ignore[misc]
     async def telegram() -> Response:
         """Handle incoming Telegram updates by putting them into the `update_queue`"""
-        print("=" * 20, "在/telegram", "=" * 20)
         await application.update_queue.put(Update.de_json(data=request.json, bot=application.bot))
         return Response(status=HTTPStatus.OK)
 
