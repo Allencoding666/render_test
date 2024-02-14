@@ -23,9 +23,9 @@ async def start(update: Update, context: CallbackContext) -> None:
 
 
 async def weather(update: Update, context: CallbackContext) -> None:
-    """取得台中市-西屯區天氣預報"""
+    """取得台中市-西屯區近24小時的天氣預報"""
     current_time = datetime.now(pytz.timezone('Asia/Taipei'))
-    eight_hours_later_time = current_time + timedelta(hours=8)
+    eight_hours_later_time = current_time + timedelta(hours=24)
     encoded_current_time = quote(current_time.strftime("%Y-%m-%dT%H:%M:%S"))
     encoded_eight_hours_later_time = quote(eight_hours_later_time.strftime("%Y-%m-%dT%H:%M:%S"))
 
@@ -45,7 +45,10 @@ async def weather(update: Update, context: CallbackContext) -> None:
     description = rsp_json["records"]["locations"][0]["location"][0]["weatherElement"][0]["description"]
 
     all_data = rsp_json["records"]["locations"][0]["location"][0]["weatherElement"][0]["time"]
-    result = f"{city} : {district}\n{description}\n當前時間 : {current_time.strftime("%Y-%m-%d %H:%M:%S")}\n\n"
+    result = (f"{city} : {district}\n"
+              f"{description}\n"
+              f"撈取時間 : {current_time.strftime('%Y-%m-%d %H:%M:%S')} ~ "
+              f"{eight_hours_later_time.strftime('%Y-%m-%d %H:%M:%S')}\n\n")
     for data in all_data:
         start_time = data["startTime"]
         end_time = data["endTime"]
